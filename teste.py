@@ -1,3 +1,6 @@
+'''
+Arquivo para testar as funcoes de scraping e verificar outras funcoes
+'''
 import sys
 import utils
 import nltk

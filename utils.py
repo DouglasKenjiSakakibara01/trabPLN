@@ -8,11 +8,11 @@ from nltk.corpus import stopwords
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import urllib.request
 
+headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 OPR/101.0.0.0'}
 
-
-def newsScraping(response):
-    if response.getcode() == 200:
-         
+def newsScraping(url):
+        req = urllib.request.Request(url=url, headers=headers) 
+        response = urllib.request.urlopen(req)
         soup = BeautifulSoup(response, 'html.parser')
         #text = soup.get_text() #Extrai todo o texto do conteúdo HTML
         span=soup.find_all("div", class_="contentSectionDetails")
@@ -27,7 +27,7 @@ def newsScraping(response):
                 span_text = element.get_text()
                 if 'Publicado' in span_text:
                     span_text=span_text.split('\n')
-                    span_text=" ".join(span_text)  # Use um espaço em branco como separador
+                    span_text=" ".join(span_text)
                     span_text=span_text.split()
                     date=span_text[1]
                     hour=span_text[2]
@@ -43,9 +43,7 @@ def newsScraping(response):
         #print(text)
 
         return date, hour, h1, text
-    else:
-        print("Erro HTTP:", response.status_code)
-        return None
+   
 
 
 def investingScraping(response):
@@ -58,15 +56,21 @@ def investingScraping(response):
             li = ul.find_all('a', href=True)#cada li representa um link para a noticia
             
             links = []
-            countNews=len(li)
+            countAux=0
+            #countNews=len(li)
+            countNews=0
             #print(li)
             for aux in li:
                 link = aux['href']
                 link = link.split("#")
                 link = link[0]
-                #print(link)
+                #print(link)#por algum motivo o mesmo link esta sendo gerado 2 vezes
+                if countAux % 2 == 0: #gambiarra para na pegar o mesmo link 2 vezes
+                    links.append(link)
+                    countNews=countNews+1
+                    
+                countAux=countAux+1
                 
-                links.append(link)
                 
             return countNews,links
         
@@ -96,3 +100,12 @@ def analiseSentimento(texto):
     print("*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-**-*-*-**-*-**-**")
     print(texto_revertido)
 
+'''
+urlInvesting='https://br.investing.com/equities/petrobras-pn-news'
+headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 OPR/101.0.0.0'}
+req = urllib.request.Request(url=urlInvesting, headers=headers) 
+response = urllib.request.urlopen(req)
+countNews, links=utils.investingScraping(response)
+print(countNews)
+print(links)
+'''
