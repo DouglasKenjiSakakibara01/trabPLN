@@ -15,4 +15,6 @@ tabela_cotacoes = pdr.get_data_yahoo("JBSS3.SA", data_inicial, data_final)
 tabela_cotacoes['Variação de Preço'] = tabela_cotacoes['Close'] - tabela_cotacoes['Open']
 
 print(tabela_cotacoes)
-#print(tabela_cotacoes.iloc[2, 6])
+
+print(type(tabela_cotacoes.iloc[2, 6]))
+print(tabela_cotacoes.iloc[2, 6])

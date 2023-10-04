@@ -46,47 +46,50 @@ def newsScraping(url):
    
 
 
-def investingScraping(response):
-    
-    if response.getcode() == 200:
-            soup = BeautifulSoup(response, 'html.parser') 
-            div=soup.find_all("div", class_="mb-4")
-            element = div[0]
-            ul = element.find('ul')
-            li = ul.find_all('a', href=True)#cada li representa um link para a noticia
-            
-            links = []
-            countAux=0
-            #countNews=len(li)
-            countNews=0
-            #print(li)
-            for aux in li:
-                link = aux['href']
-                link = link.split("#")
-                link = link[0]
-                #print(link)#por algum motivo o mesmo link esta sendo gerado 2 vezes
-                if countAux % 2 == 0: #gambiarra para na pegar o mesmo link 2 vezes
-                    links.append(link)
-                    countNews=countNews+1
+def investingScraping(stockUrl):
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 OPR/101.0.0.0'}
+    for i in range(1,5):#para pegar mais noticias no site
+            urlInvesting='https://br.investing.com/equities'+f"{stockUrl}"+f"/{i}"
+            req = urllib.request.Request(url=urlInvesting, headers=headers) 
+            response = urllib.request.urlopen(req)
+            if response.getcode() == 200:
+                soup = BeautifulSoup(response, 'html.parser') 
+                div=soup.find_all("div", class_="mb-4")
+                element = div[0]
+                ul = element.find('ul')
+                li = ul.find_all('a', href=True)#cada li representa um link para a noticia                
+                links = []
+                countAux=0
+                #countNews=len(li)
+                countNews=0
+                #print(li)
                     
-                countAux=countAux+1
-                
-                
-            return countNews,links
-        
-        
-
-
-    else:
-            print("Erro HTTP:", response.status_code)
-            return None
+                for aux in li:
+                    link = aux['href']
+                    link = link.split("#")
+                    link = link[0]
+                    
+                    
+                    #print(link)#por algum motivo o mesmo link esta sendo gerado 2 vezes
+                    if countAux % 2 == 0: #gambiarra para na pegar o mesmo link 2 vezes
+                        links.append(link)
+                        countNews=countNews+1
+                        #print(i)
+                        #print(link) 
+                                
+                    countAux=countAux+1
+                       
+            else:
+                print("Erro HTTP:", response.status_code)
+    return countNews,links       
 
 def analiseSentimento(texto):
     sia = SentimentIntensityAnalyzer()
     sentimento = sia.polarity_scores(texto)
-    print("Avaliacao do sentimento antes do uso de tecnicas pln:")
-    print(sentimento)
-    print("*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-**-*-*-**-*-**-**")
+    compoundBefore = sentimento["compound"]#pega o a pontuacao geral do sentimento antes da aplicacao das tecnicas pln
+    #print("Avaliacao do sentimento antes do uso de tecnicas pln:")
+    #print(sentimento)
+    #print("*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-**-*-*-**-*-**-**")
     texto=texto.lower() #converte para minusculo as palavras do texto
     texto = word_tokenize(texto) #Dividi o texto em unidades menores
     simbolos=['.',',',';', '-', '"', '(', ')', '”','“', '<', '>', '``',"''"]
@@ -94,11 +97,12 @@ def analiseSentimento(texto):
     texto = [palavra for palavra in texto if palavra.lower() not in stopwords.words('portuguese')] # retira os stopwords
     texto_revertido = ' '.join(texto)
     sentimento = sia.polarity_scores(texto_revertido)
-    
-    print("Avaliacao do sentimento apos o uso de tecnicas pln:")
-    print(sentimento)
-    print("*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-**-*-*-**-*-**-**")
-    print(texto_revertido)
+    compoundAfter = sentimento["compound"]#pega o a pontuacao geral do sentimento depois da aplicacao das tecnicas pln
+    #print("Avaliacao do sentimento apos o uso de tecnicas pln:")
+    #print(sentimento)
+    #print("*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-**-*-*-**-*-**-**")
+    #print(texto_revertido)
+    return compoundBefore, compoundAfter
 
 '''
 urlInvesting='https://br.investing.com/equities/petrobras-pn-news'
