@@ -1,52 +1,31 @@
+import sys
+import utils
 import nltk
 from nltk.tokenize import word_tokenize
 import requests
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from datetime import datetime
+import urllib.request
+
+urlInvesting='https://br.investing.com/equities/petrobras-pn-news'
+url='https://br.investing.com/news/stock-market-news/petrobras-avalia-possibilidade-de-reajuste-de-diesel-e-gasolina-antes-do-fim-do-ano-diz-ceo-1162147'
+
+headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 OPR/101.0.0.0'}
+req = urllib.request.Request(url=url, headers=headers) 
+response = urllib.request.urlopen(req)
+date, hour, h1, text=utils.newsExtract(response)
+# Converte a data para um objeto datetime
+obj = datetime.strptime(date, '%d.%m.%Y')
+
+# Formata a data de acordo com (MM/DD/AAAA) 
+date_format= obj.strftime('%m-%d-%Y')
+
+print(date_format)
+print(hour)
+print(h1)
+utils.analiseSentimento(text)
 
 
-# URL da página da web que você deseja extrair
-url = 'https://exame.com/invest/mercados/cvc-dispara-17-com-derrocada-da-123-milhas/'
 
-# Enviar uma solicitação HTTP para a página
-response = requests.get(url)
-
-# Verificar se a solicitação foi bem-sucedida (código de status 200 indica sucesso)
-if response.status_code == 200:
-    # Parsear o conteúdo HTML da página usando BeautifulSoup
-    soup = BeautifulSoup(response.text, 'html.parser')
-    #texto = soup.get_text() #Extrair todo o texto do conteúdo HTML
-    h1= soup.find("h1", class_="sc-c4a67c2e-0 bEYuXH")
-    h2= soup.find("h2", class_="sc-aa737d12-2 bSTVNX")
-    body=soup.find("div", id="news-body")
-    '''
-    print(h1.get_text())
-    print(h2.get_text())
-    print(body.get_text())
-    '''
-    texto=h1.get_text()+h2.get_text()+body.get_text()
-    #print(texto)
-    
-    sia = SentimentIntensityAnalyzer()
-    sentimento = sia.polarity_scores(texto)
-    print("Avaliacao do sentimento antes do uso de tecnicas pln:")
-    print(sentimento)
-    print("*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-**-*-*-**-*-**-**")
-    texto=texto.lower() #converte para minusculo as palavras do texto
-    tokens = word_tokenize(texto) #Dividi o texto em unidades menores
-    simbolos=['.',',',';', '-', '"', '(', ')']
-    tokens= [palavra for palavra in tokens if palavra not in simbolos] #retira os simbolos de pontuacao
-    final = [palavra for palavra in tokens if palavra.lower() not in stopwords.words('portuguese')] # retira os stopwords
-    texto_revertido = ' '.join(final)
-    sentimento = sia.polarity_scores(texto_revertido)
-
-    print("Avaliacao do sentimento apos o uso de tecnicas pln:")
-    print(sentimento)
-    print("*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-**-*-*-**-*-**-**")
-    print(texto_revertido)
-    
-
-   
-else:
-    print(f"A solicitação falhou com o código de status {response.status_code}")
