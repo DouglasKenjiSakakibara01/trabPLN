@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import urllib.request
-
+import spacy
 headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 OPR/101.0.0.0'}
 
 def newsScraping(url):
@@ -48,7 +48,9 @@ def newsScraping(url):
 
 def investingScraping(stockUrl):
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 OPR/101.0.0.0'}
-    for i in range(1,5):#para pegar mais noticias no site
+    links = []
+    countNews=0
+    for i in range(1,15,2):#para pegar mais noticias no site
             urlInvesting='https://br.investing.com/equities'+f"{stockUrl}"+f"/{i}"
             req = urllib.request.Request(url=urlInvesting, headers=headers) 
             response = urllib.request.urlopen(req)
@@ -58,11 +60,7 @@ def investingScraping(stockUrl):
                 element = div[0]
                 ul = element.find('ul')
                 li = ul.find_all('a', href=True)#cada li representa um link para a noticia                
-                links = []
                 countAux=0
-                #countNews=len(li)
-                countNews=0
-                #print(li)
                     
                 for aux in li:
                     link = aux['href']
@@ -72,10 +70,11 @@ def investingScraping(stockUrl):
                     
                     #print(link)#por algum motivo o mesmo link esta sendo gerado 2 vezes
                     if countAux % 2 == 0: #gambiarra para na pegar o mesmo link 2 vezes
-                        links.append(link)
+                        
                         countNews=countNews+1
                         #print(i)
                         #print(link) 
+                        links.append(link)
                                 
                     countAux=countAux+1
                        
@@ -83,33 +82,35 @@ def investingScraping(stockUrl):
                 print("Erro HTTP:", response.status_code)
     return countNews,links       
 
-def analiseSentimento(texto):
+def analiseSentimento(text):
     sia = SentimentIntensityAnalyzer()
-    sentimento = sia.polarity_scores(texto)
-    compoundBefore = sentimento["compound"]#pega o a pontuacao geral do sentimento antes da aplicacao das tecnicas pln
-    #print("Avaliacao do sentimento antes do uso de tecnicas pln:")
-    #print(sentimento)
-    #print("*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-**-*-*-**-*-**-**")
-    texto=texto.lower() #converte para minusculo as palavras do texto
-    texto = word_tokenize(texto) #Dividi o texto em unidades menores
-    simbolos=['.',',',';', '-', '"', '(', ')', '”','“', '<', '>', '``',"''"]
-    texto= [palavra for palavra in texto if palavra not in simbolos] #retira os simbolos de pontuacao
-    texto = [palavra for palavra in texto if palavra.lower() not in stopwords.words('portuguese')] # retira os stopwords
-    texto_revertido = ' '.join(texto)
-    sentimento = sia.polarity_scores(texto_revertido)
-    compoundAfter = sentimento["compound"]#pega o a pontuacao geral do sentimento depois da aplicacao das tecnicas pln
-    #print("Avaliacao do sentimento apos o uso de tecnicas pln:")
-    #print(sentimento)
-    #print("*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-**-*-*-**-*-**-**")
-    #print(texto_revertido)
+    nlp = spacy.load('pt_core_news_sm')
+    sentiment = sia.polarity_scores(text)
+    compoundBefore = sentiment["compound"]#pega a pontuacao geral do sentimento antes da aplicacao das tecnicas pln
+    print("Avaliacao do sentimento antes do uso de tecnicas pln:")
+    print(compoundBefore)
+    print("*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-**-*-*-**-*-**-**")
+    text=text.lower() #converte para minusculo as palavras do texto
+    text = word_tokenize(text) #Dividi o texto em unidades menores
+    simbols=['.',',',';', '-', '"', '(', ')', '”','“', '<', '>', '``',"''", ':']
+    text= [word for word in text if word not in simbols] #retira os simbolos de pontuacao
+    text = [word for word in text if word.lower() not in stopwords.words('portuguese')] # retira os stopwords
+    text=' '.join(text)
+    doc = nlp(text)
+    text = [token.lemma_ for token in doc]#lematizacao
+    print('\n')
+    print(text)
+    text=' '.join(text)
+    sentiment= sia.polarity_scores(text)
+    compoundAfter = sentiment["compound"]#pega o a pontuacao geral do sentimento depois da aplicacao das tecnicas pln
+    print("Avaliacao do sentimento apos o uso de tecnicas pln:")
+    print(compoundAfter)
+    print("*-*-*-*-*-*-*-*-*-*-*-*-*-**-*-*-*-*-*-**-*-*-**-*-**-**")
+    
     return compoundBefore, compoundAfter
 
-'''
-urlInvesting='https://br.investing.com/equities/petrobras-pn-news'
-headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 OPR/101.0.0.0'}
-req = urllib.request.Request(url=urlInvesting, headers=headers) 
-response = urllib.request.urlopen(req)
-countNews, links=utils.investingScraping(response)
-print(countNews)
-print(links)
-'''
+
+#countNews, links=utils.investingScraping('/cvc-brasil-on-news')
+#print(countNews)
+#print(links)
+
