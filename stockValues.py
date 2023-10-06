@@ -6,7 +6,7 @@ from datetime import datetime,timedelta
 yfinance.pdr_override()
 
 
-def marketValue(stock,date):
+def stockValue(stock,date):
     date_separeted=date.split('-')
     data_alvo = datetime(int(date_separeted[0]),int(date_separeted[1]),int(date_separeted[2]))  # Substitua esta data pela data desejada
     dia_semana = data_alvo.weekday()

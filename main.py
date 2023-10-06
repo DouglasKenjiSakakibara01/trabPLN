@@ -1,6 +1,6 @@
 import sys
 import utils
-import precos
+import stockValues
 import nltk
 from nltk.tokenize import word_tokenize
 import requests
@@ -41,8 +41,8 @@ def generate_results(stock,stockUrl):
         obj = datetime.strptime(date, '%d.%m.%Y')
         # Formata a data de acordo com (MM/DD/AAAA) 
         date_format= obj.strftime('%Y-%m-%d')
-        sentimentBefore, sentimentAfter=utils.analiseSentimento(text)
-        valueBefore, value, valueAfter=precos.marketValue(stock, date_format)
+        sentimentBefore, sentimentAfter=utils.sentiment_analyze(text)
+        valueBefore, value, valueAfter=stockValues.stockValue(stock, date_format)
         line=[]
         
         line.append(stock)
@@ -70,12 +70,6 @@ def generate_results(stock,stockUrl):
 def main(stock):
     stockUrl=None
     fileName=None
-    '''
-    if stock=='BBAS3.SA':
-        stockUrl='/brasil-on-news'
-        data=generate_results(stock,stockUrl)
-        fileName='bbas3'
-    '''
     if stock=='MGLU3.SA':
         stockUrl='/magaz-luiza-on-nm-news'
         data=generate_results(stock,stockUrl)
@@ -142,5 +136,5 @@ def main(stock):
 
 
 if __name__ == "__main__":
-    main('MGLU3.SA')
+    main('CVCB3.SA')
 

@@ -8,6 +8,7 @@ from nltk.corpus import stopwords
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import urllib.request
 import spacy
+from translate import Translator
 headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 OPR/101.0.0.0'}
 
 def newsScraping(url):
@@ -82,7 +83,7 @@ def investingScraping(stockUrl):
                 print("Erro HTTP:", response.status_code)
     return countNews,links       
 
-def analiseSentimento(text):
+def sentiment_analyze(text):
     sia = SentimentIntensityAnalyzer()
     nlp = spacy.load('pt_core_news_sm')
     sentiment = sia.polarity_scores(text)
@@ -95,6 +96,11 @@ def analiseSentimento(text):
     simbols=['.',',',';', '-', '"', '(', ')', '”','“', '<', '>', '``',"''", ':']
     text= [word for word in text if word not in simbols] #retira os simbolos de pontuacao
     text = [word for word in text if word.lower() not in stopwords.words('portuguese')] # retira os stopwords
+    '''
+    translator = Translator(to_lang="pt")#objeto Translator
+    for i in range(text):
+        text[0]=translator.translate(text[0])
+    '''
     text=' '.join(text)
     doc = nlp(text)
     text = [token.lemma_ for token in doc]#lematizacao
