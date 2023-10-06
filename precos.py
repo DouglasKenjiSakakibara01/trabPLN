@@ -19,7 +19,7 @@ def marketValue(stock,date):
         after=str(after)
         after=after.split(' ')
         after=after[0]
-        print('Sexta')
+        #print('Sexta')
     elif(dia_semana==5):#caso a data da publicacao seja sabado
         before = data_alvo - timedelta(days=1)
         before=str(before)
@@ -29,7 +29,7 @@ def marketValue(stock,date):
         after=str(after)
         after=after.split(' ')
         after=after[0]
-        print('sabado')
+        #print('sabado')
     elif(dia_semana==6):#caso a data da publicacao seja domingo
         before = data_alvo - timedelta(days=3)
         before=str(before)
@@ -39,7 +39,7 @@ def marketValue(stock,date):
         after=str(after)
         after=after.split(' ')
         after=after[0]    
-        print('domingo')
+        #print('domingo')
     elif(dia_semana==0):#caso a data da publicacao seja segunda
         before = data_alvo - timedelta(days=3)
         before=str(before)
@@ -49,7 +49,7 @@ def marketValue(stock,date):
         after=str(after)
         after=after.split(' ')
         after=after[0]  
-        print('segunda')
+        #print('segunda')
     else:
         before = data_alvo - timedelta(days=1)
         before=str(before)
@@ -59,7 +59,7 @@ def marketValue(stock,date):
         after=str(after)
         after=after.split(' ')
         after=after[0]
-        print('normal')
+        #print('normal')
     #print(before)
     #print(date)
     #print(after)
@@ -80,4 +80,4 @@ def marketValue(stock,date):
     #print(valueAfter)
     return valueBefore, value, valueAfter
     
-marketValue('JBSS3.SA','2023-10-02')
+#marketValue('JBSS3.SA','2023-10-02')
